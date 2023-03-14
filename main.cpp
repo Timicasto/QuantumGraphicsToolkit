@@ -1,10 +1,9 @@
-#include "qgt/Window.h"
+#include "qgt/WindowFactory.h"
 
 int main() {
-	auto w = Window("TestWindow", 800, 600);
-	w.setPosMode(PIXEL_NEG);
-	w.setScaleMode(SCALE);
-	w.setVsync(false);
+	auto w = WindowFactory().title("TestWindow").size(1024, 768).scaleMode(SCALE).posMode(PIXEL_NEG)
+			.defaultContext().forceAspectRatio(16, 9).scalable(true).sizeLimitMin(200, 200)
+			.sizeLimitMax(2000, 2000).windowedFullscreen().construct();
 	
 	
 	while (!w.shouldClose()) {

@@ -44,11 +44,11 @@ public:
 	
 	glm::mat4 projection;
 	
-	Window(const std::string& title, size_t width, size_t height) : Window(title, width, height, 3, 3){
+	Window(const std::string& title, size_t width, size_t height) : Window(title, width, height, 3, 3, GLFW_OPENGL_CORE_PROFILE, true){
 	
 	}
 	
-	Window(const std::string& title, size_t width, size_t height, int majorVer, int minorVer) {
+	Window(const std::string& title, size_t width, size_t height, int majorVer, int minorVer, int profile, bool fwdCompat) {
 		if (!glfwInit()) {
 			char error[9];
 			sprintf(error, "%08X", glfwGetError(nullptr));
@@ -60,8 +60,8 @@ public:
 		}
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVer);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVer);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, profile);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, fwdCompat ? GL_TRUE : GL_FALSE);
 		
 		window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 		
@@ -155,6 +155,51 @@ public:
 				break;
 		}
 		makeCurrent();
+	}
+	
+	void maximize() const {
+		glfwMaximizeWindow(window);
+	}
+	
+	void fullscreen(GLFWmonitor* m) const {
+		auto _mode = glfwGetVideoMode(m);
+		glfwSetWindowMonitor(window, m, 0, 0, _mode->width, _mode->height, _mode->refreshRate);
+	}
+	
+	void setTitle(const std::string& val) const {
+		glfwSetWindowTitle(window, val.c_str());
+	}
+	
+	void setSize(int x, int y) const {
+		glfwSetWindowSize(window, x, y);
+	}
+	
+	void setPos(int x, int y) const {
+		glfwSetWindowPos(window, x, y);
+	}
+	
+	[[nodiscard]] glm::ivec2 getPos() const {
+		int x, y;
+		glfwGetWindowPos(window, &x, &y);
+		return {x, y};
+	}
+	
+	[[nodiscard]] glm::ivec2 getSize() const {
+		int x, y;
+		glfwGetWindowSize(window, &x, &y);
+		return {x, y};
+	}
+	
+	void hide() const {
+		glfwHideWindow(window);
+	}
+	
+	void show() const {
+		glfwShowWindow(window);
+	}
+	
+	void focus() const {
+		glfwFocusWindow(window);
 	}
 };
 
