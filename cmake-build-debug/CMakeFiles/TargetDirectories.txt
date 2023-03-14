@@ -1,0 +1,3 @@
+/home/timicasto/CLionProjects/QuantumGraphicsToolkit/cmake-build-debug/CMakeFiles/QuantumGraphicsToolkit.dir
+/home/timicasto/CLionProjects/QuantumGraphicsToolkit/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/timicasto/CLionProjects/QuantumGraphicsToolkit/cmake-build-debug/CMakeFiles/rebuild_cache.dir
