@@ -3,7 +3,7 @@
 int main() {
 	auto w = WindowFactory().title("TestWindow").size(1024, 768).scaleMode(SCALE).posMode(PIXEL_NEG)
 			.defaultContext().forceAspectRatio(16, 9).scalable(true).sizeLimitMin(200, 200)
-			.sizeLimitMax(2000, 2000).windowedFullscreen().construct();
+			.sizeLimitMax(2000, 2000).fullscreen(0).construct();
 	
 	
 	while (!w.shouldClose()) {

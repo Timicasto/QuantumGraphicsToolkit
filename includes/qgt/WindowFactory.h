@@ -14,7 +14,7 @@ typedef struct Context {
 class WindowFactory{
 private:
 	int width{}, height{};
-	GLFWmonitor* monitor;
+	int monitor = INT_MAX;
 	bool isFullscreen = false;
 	bool isWindowedFullscreen = false;
 	bool isScalable = false;
@@ -29,7 +29,7 @@ private:
 	
 public:
 	
-	WindowFactory() : monitor(nullptr), share(nullptr) {
+	WindowFactory() : monitor(INT_MAX), share(nullptr) {
 	
 	}
 	
@@ -56,9 +56,8 @@ public:
 	}
 	
 	WindowFactory fullscreen(int m) {
-		int len;
-		monitor = glfwGetMonitors(&len)[m];
 		isFullscreen = true;
+		monitor = m;
 		return *this;
 	}
 	
@@ -122,8 +121,9 @@ public:
 		}
 		auto ret = Window(windowTitle, width, height, context.majorVer, context.minorVer, context.profile, context.forwardCompat);
 		if (isFullscreen) {
-			const auto videoMode = glfwGetVideoMode(monitor);
-			glfwSetWindowMonitor(ret.window, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
+			int tmp;
+			const auto videoMode = glfwGetVideoMode(glfwGetMonitors(&tmp)[monitor]);
+			glfwSetWindowMonitor(ret.window, glfwGetMonitors(&tmp)[monitor], 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
 		}
 		if (isWindowedFullscreen) {
 			glfwMaximizeWindow(ret.window);
