@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include FT_FREETYPE_H"freetype/freetype.h"
+#include FT_FREETYPE_H
 #include "RenderableCharacter.h"
 #include "logger.h"
 #include "Shader.h"
@@ -25,7 +25,7 @@ public:
 	FontRenderer() : FontRenderer(Shader(defVsh, defFsh)) {
 	}
 	
-	FontRenderer(Shader shader) : s(shader) {
+	explicit FontRenderer(Shader shader) : s(shader) {
 		if (FT_Init_FreeType(&lib)) {
 			log(FATAL, "Failed to initialize Freetype Library");
 		} else {
@@ -48,24 +48,61 @@ public:
 		if (FT_New_Face(lib, path.c_str(), 0, &face)) {
 			log(ERROR, "Error while reading font file " + path);
 		} else {
-			log(INFO, "Loaded vector font file " + path + " got font face " + face->family_name);
+			log(INFO, "Loaded vector font file " + path + " got font face " + face->family_name + "(" + face->style_name + ")" + " and " + std::to_string(face->num_glyphs) + " glyphs");
+		}
+		if (FT_HAS_FIXED_SIZES(face)) {
+			log(WARN, "Loaded font file contains bitmaps that are fixed size, parsing and rendering may misbehave or exit with an error");
+		}
+		if (FT_HAS_COLOR(face)) {
+			log(WARN, "Loaded font file contains color, parsing and rendering may misbehave");
 		}
 		FT_Set_Pixel_Sizes(face, 0, size);
 		
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		std::vector<std::pair<wchar_t, wchar_t>> toLoad;
+		bool loadAll = false;
 		
-		if (mode % 2 != 0) {
+		if (mode % 2) {
 			toLoad.emplace_back(0, 128);
 		}
 		
-		if ((mode >> 1) % 2 != 0) {
+		if ((mode >> 1) % 2) {
 			toLoad.emplace_back(0x4E00, 0x9FEA);
 			toLoad.emplace_back(0x3430, 0x4DB5);
 			toLoad.emplace_back(0xF900, 0xFAD9);
 		}
 		
+		if ((mode >> 7) % 2)  {
+			loadAll = true;
+		}
+		
 		std::unordered_map<wchar_t, RenderableCharacter> fontMap;
+		
+		if (loadAll) {
+			uint64_t charcode;
+			uint32_t index;
+			charcode = FT_Get_First_Char(face, &index);
+			while (index) {
+				if (FT_Load_Char(face, index, FT_LOAD_RENDER)) {
+					log(ERROR, "Error while loading glyph " + std::to_string(charcode));
+				} else {
+					log(DEBUG, "Loaded glyph " + std::to_string(charcode) +" from face " + face->family_name);
+				}
+				
+				GLuint tex;
+				glGenTextures(1, &tex);
+				glBindTexture(GL_TEXTURE_2D, tex);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				auto ch = RenderableCharacter(tex, glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows), glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top), face->glyph->advance.x);
+				fontMap.insert(std::make_pair(index, ch));
+				
+				charcode = FT_Get_Next_Char(face, charcode, &index);
+			}
+		}
 		
 		for (const auto& range : toLoad) {
 			for (auto c = range.first; c <= range.second; ++c) {
@@ -86,6 +123,7 @@ public:
 				fontMap.insert(std::make_pair(c, ch));
 			}
 		}
+		
 		fonts.emplace_back(fontMap);
 		FT_Done_Face(face);
 		return fonts.size() - 1;

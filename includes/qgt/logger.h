@@ -13,7 +13,7 @@ typedef enum LogLevel {
 	DEBUG
 } LogLevel;
 
-static LogLevel level = INFO;
+static LogLevel level = DEBUG;
 
 void setLogLevel(LogLevel newLevel) {
 	level = newLevel;
