@@ -17,7 +17,7 @@ static const std::string defFsh = "#version 330 core\nin vec2 texCoords;\nout ve
 
 class FontRenderer {
 public:
-	GLuint vao, vbo;
+	GLuint vao{}, vbo{};
 	FT_Library lib;
 	std::vector<std::unordered_map<wchar_t, RenderableCharacter>> fonts;
 	Shader s;

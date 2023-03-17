@@ -1,5 +1,6 @@
 #include "qgt/WindowFactory.h"
 #include "qgt/FontRenderer.h"
+#include "qgt/StaticFontRenderer.h"
 
 int main() {
 	auto w = WindowFactory().title("TestWindow").size(1280, 720).scaleMode(SCALE).posMode(PIXEL_NEG)
