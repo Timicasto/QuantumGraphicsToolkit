@@ -13,7 +13,8 @@ static const std::string staticDefFsh = "#version 330 core\nin vec2 texCoords;\n
 class StaticFontRenderer {
 	GLuint vao{};
 
-	StaticFontRenderer(const std::string& fontPath, int size, const std::wstring& text, Shader s, float x, float y, float scale, glm::vec3 color) {
+public:
+	StaticFontRenderer(const std::string& fontPath, int size, const std::wstring& text, float x, float y, float scale, glm::vec3 color) {
 		FT_Library lib;
 		FT_Init_FreeType(&lib);
 		FT_Face face;
@@ -22,7 +23,8 @@ class StaticFontRenderer {
 
 		GLuint vbo;
 
-		std::vector<float[24]> data;
+		std::vector<std::vector<float>> data;
+		std::vector<std::tuple<std::vector<unsigned char>, int, int>> glyphs;
 
 		unsigned int idx = 0;
 		for (const auto &item: text) {
@@ -44,20 +46,50 @@ class StaticFontRenderer {
 			float yPos = y - (sizeH - bearingY) * scale;
 			float w = sizeW * scale;
 			float h = sizeH * scale;
+			
 
-			float glyph[24] = {
-
-			};
-
-			data.emplace_back({xPos, yPos + h, 0.0, 0.0,
+			data.emplace_back(std::vector<float> {xPos, yPos + h, 0.0, 0.0,
 			                   xPos, yPos, 0.0, 1.0,
 			                   xPos + w, yPos, 1.0, 1.0,
 			                   xPos, yPos + h, 0.0, 0.0,
 			                   xPos + w, yPos, 1.0, 1.0,
 			                   xPos + w, yPos + h, 1.0, 0.0});
+			
+			std::vector<unsigned char> tmp = {face->glyph->bitmap.buffer, face->glyph->bitmap.buffer + face->glyph->bitmap.width * face->glyph->bitmap.rows};
+			glyphs.emplace_back(tmp, sizeW, sizeH);
 			++idx;
+			x += (advance >> 6) * scale;
 		}
-
+		
+		int totalH = std::get<2>(glyphs[0]), totalW = 0;
+		for (const auto& item : glyphs) {
+			if (std::get<2>(item) > totalH) {
+				totalH = std::get<2>(item);
+			}
+			totalW += std::get<1>(item);
+		}
+		
+		auto** texture = new unsigned char*[totalH];
+		for (int i = 0 ; i < totalH ; ++i) {
+			texture[i] = new unsigned char[totalW];
+		}
+		
+		std::fill(texture[0], texture[0] + totalW * totalH, 0x00);
+		
+		int startX = 0, startY = 0;
+		for (const auto& item : glyphs)  {
+			int currX = 0, currY = totalH - 1, tarX = std::get<1>(item) - 1;
+			for (const auto& bit : std::get<0>(item)) {
+				if (currX == tarX) {
+					currX = 0;
+					--currY;
+				}
+				texture[currY][startX + currX] = bit;
+				++currX;
+			}
+			startX += std::get<1>(item);
+		}
+		
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
 		glBindVertexArray(vao);

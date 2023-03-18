@@ -1,3 +1,4 @@
+#include <memory>
 #include "qgt/WindowFactory.h"
 #include "qgt/FontRenderer.h"
 #include "qgt/StaticFontRenderer.h"
@@ -9,6 +10,8 @@ int main() {
 	setLogLevel(DEBUG);
 	auto renderer = FontRenderer();
 	auto font = renderer.loadFont("./JetBrainsMono-Medium.ttf", 0x80, 48);
+	
+	auto s = StaticFontRenderer("JetBrainsMono-Medium.ttf", 24, L"Test text", 0.0F, 0.0F, 1.0F, glm::vec3(0.0F,0.0F,0.0F));
 	
 	while (!w.shouldClose()) {
 		glClear(GL_COLOR_BUFFER_BIT);
