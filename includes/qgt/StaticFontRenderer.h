@@ -11,10 +11,15 @@ static const std::string staticDefVsh = "#version 330 core\nlayout (location = 0
 static const std::string staticDefFsh = "#version 330 core\nin vec2 texCoords;\nout vec4 color;\n\nuniform sampler2D text;\nuniform vec3 textColor;\n\nvoid main() {\n    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, texCoords).r);\n    color = vec4(textColor, 1.0) * sampled;\n}";
 
 class StaticFontRenderer {
-	GLuint vao{};
+	GLuint vao{}, tex{};
+	Shader s;
+	glm::vec3 color;
+	int length{};
 
 public:
-	StaticFontRenderer(const std::string& fontPath, int size, const std::wstring& text, float x, float y, float scale, glm::vec3 color) {
+	StaticFontRenderer(const std::string& fontPath, int size, const std::wstring& text, float x, float y, float scale, glm::vec3 color) : StaticFontRenderer(fontPath, size, text, Shader(staticDefVsh, staticDefFsh), x, y, scale, color) {}
+
+	StaticFontRenderer(const std::string& fontPath, int size, const std::wstring& text, Shader sh, float x, float y, float scale, glm::vec3 c) : s(sh), color(c), length(text.size()) {
 		FT_Library lib;
 		FT_Init_FreeType(&lib);
 		FT_Face face;
@@ -74,31 +79,49 @@ public:
 			texture[i] = new unsigned char[totalW];
 		}
 		
-		std::fill(texture[0], texture[0] + totalW * totalH, 0x00);
-		
 		int startX = 0, startY = 0;
 		for (const auto& item : glyphs)  {
-			int currX = 0, currY = totalH - 1, tarX = std::get<1>(item) - 1;
+			int currX = 0, currY = 0, tarX = std::get<1>(item) - 1;
 			for (const auto& bit : std::get<0>(item)) {
+				auto dta = std::get<0>(item) ;
+				texture[currY][startX + currX] = bit;
 				if (currX == tarX) {
 					currX = 0;
-					--currY;
+					++currY;
+				} else {
+					++currX;
 				}
-				texture[currY][startX + currX] = bit;
-				++currX;
 			}
 			startX += std::get<1>(item);
 		}
-		
+
+		glGenTextures(1, &tex);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, totalW, totalH, 0, GL_RED, GL_UNSIGNED_BYTE, texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4 * text.size(), nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4 * text.size(), &data[0][0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+	}
+
+	void render() {
+		s.use();
+		s.setVec3f("textColor", color);
+		s.setMat4f("projection", getProjection());
+		glActiveTexture(GL_TEXTURE0);
+		glBindVertexArray(vao);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glDrawArrays(GL_TRIANGLES, 0, 6 * length);
 	}
 };
 
