@@ -27,8 +27,11 @@ public:
 		FT_Set_Pixel_Sizes(face, 0, size);
 
 		GLuint vbo;
-
-		std::vector<std::vector<float>> data;
+		
+		auto** data = new float*[text.size()];
+		for (int i = 0 ; i < text.size() ; ++i) {
+			data[i] = new float[24];
+		}
 		std::vector<std::tuple<std::vector<unsigned char>, int, int>> glyphs;
 
 		unsigned int idx = 0;
@@ -52,13 +55,10 @@ public:
 			float w = sizeW * scale;
 			float h = sizeH * scale;
 			
-
-			data.emplace_back(std::vector<float> {xPos, yPos + h, 0.0, 0.0,
-			                   xPos, yPos, 0.0, 1.0,
-			                   xPos + w, yPos, 1.0, 1.0,
-			                   xPos, yPos + h, 0.0, 0.0,
-			                   xPos + w, yPos, 1.0, 1.0,
-			                   xPos + w, yPos + h, 1.0, 0.0});
+			data[idx][0] = data[idx][4] = data[idx][12] = xPos;
+			data[idx][5] = data[idx][9] = data[idx][17] = yPos;
+			data[idx][8] = data[idx][16] = data[idx][20] = xPos + w;
+			data[idx][1] = data[idx][13] = data[idx][21] = yPos + h;
 			
 			std::vector<unsigned char> tmp = {face->glyph->bitmap.buffer, face->glyph->bitmap.buffer + face->glyph->bitmap.width * face->glyph->bitmap.rows};
 			glyphs.emplace_back(tmp, sizeW, sizeH);
@@ -74,17 +74,17 @@ public:
 			totalW += std::get<1>(item);
 		}
 		
-		auto** texture = new unsigned char*[totalH];
-		for (int i = 0 ; i < totalH ; ++i) {
-			texture[i] = new unsigned char[totalW];
+		auto** texture = new unsigned char*[totalW];
+		for (int i = 0 ; i < totalW ; ++i) {
+			texture[i] = new unsigned char[totalH];
 		}
 		
-		int startX = 0, startY = 0;
+		int startX = 0, startY = 0, it = 0;
 		for (const auto& item : glyphs)  {
 			int currX = 0, currY = 0, tarX = std::get<1>(item) - 1;
 			for (const auto& bit : std::get<0>(item)) {
 				auto dta = std::get<0>(item) ;
-				texture[currY][startX + currX] = bit;
+				texture[startX + currX][currY] = bit;
 				if (currX == tarX) {
 					currX = 0;
 					++currY;
@@ -92,12 +92,37 @@ public:
 					++currX;
 				}
 			}
+			
+			data[it][2] = data[it][6] = data[it][14] = (float)startX / totalW;
 			startX += std::get<1>(item);
+			data[it][10] = data[it][18] = data[it][22] = (float)startX / totalW;
+			data[it][3] = data[it][15] = data[it][23] = 0.0F;
+			data[it][7] = data[it][11] = data[it][19] = (float)std::get<2>(item) / totalH;
+			++it;
+		}
+		
+		float vertices[text.size() * 24];
+		int cx = 0;
+		for (int ch = 0 ; ch < text.size() ; ++ch) {
+			for (int vert = 0 ; vert < 24 ; ++vert) {
+				vertices[cx] = data[ch][vert];
+				++cx;
+			}
+		}
+		
+		unsigned char texPtr[totalW * totalH];
+		std::fill(texPtr, texPtr + totalW + totalH, 0);
+		int ptr = 0;
+		for (int iy = 0 ; iy < totalH ; ++iy) {
+			for (int ix = 0 ; ix < totalW ; ++ix) {
+				texPtr[ptr] = texture[ix][iy];
+				++ptr;
+			}
 		}
 
 		glGenTextures(1, &tex);
 		glBindTexture(GL_TEXTURE_2D, tex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, totalW, totalH, 0, GL_RED, GL_UNSIGNED_BYTE, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, totalW, totalH, 0, GL_RED, GL_UNSIGNED_BYTE, texPtr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -107,7 +132,7 @@ public:
 		glGenBuffers(1, &vbo);
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4 * text.size(), &data[0][0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4 * text.size(), vertices, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
