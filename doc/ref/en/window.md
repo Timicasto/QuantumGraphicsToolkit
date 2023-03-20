@@ -31,24 +31,24 @@
 <br><br>
 
 `void postToScreen() const`
-> exchange the front and back cache of window: you need to do that after GPU rendered a frame every time. The content GPU rendered is saved in back cache. When the function is called, content in back cache is moved to front cache, then the content is displayed.
+> swap the front and back buffer of window: you need to do that after GPU rendered a frame every time. The content GPU rendered is saved in back frame buffer. When the function is called, content in back buffer will be moved to front buffer, then the content is displayed.
 
 <br><br>
 
 `void makeCurrent() const`
-> select context of window: static operations on all windows and all render operations are all applied to windows called this function. (this is automatically done when windows are created)
+> select context of window: static operations on all windows and all rendering operations are all applied to windows called this function. (this is automatically done when windows are created)
 
 <br><br>
 
 `void setWindowScalable(bool val) const`
-> allow or forbidden windows being scaled by user.
+> allowing or disallowing windows being scaled by user.
 
 <br><br>
 
 `void setVsync(bool val)`
-> open or close Vsync<br>
-> !! CAUT !! :: when Vsync is closed OpenGL is always trying to render more frame per second, no matter it reaches thousands or millions FPS, until it reached the limit of computer, while the CPUs of users are crying...<br>
-> Stop bully modern computer hardware, they shouldn't be punished. :P
+> enable or disable Vsync<br>
+> !! CAUT !! :: when Vsync is closed OpenGL is always trying to render more frames per second, no matter it reaches thousands or millions FPS, until it reached the limit of computer, while the CPUs of users are crying...<br>
+> Stop bullying modern computer hardware, they shouldn't be punished. :P
 
 <br><br>
 
@@ -56,4 +56,4 @@
 > set the Scale Mode of window.<br>
 > SCALE mode: scale all elements to fit screen (overlapping or other incidents that breaks typography never happens! In this mode, the typography is always consistent with your code!)<br>
 > EXPAND mode: keep the elements size. Crop the existing elements or expend space to render new elements. (windows of chrome browser follows this logic)<br>
-> !! CAUT !! :: EXPAND mode is not accessible in *_COORD Position Mode. Because it may lead to `std::runtime_error`.
+> !! CAUT !! :: EXPAND mode is not available in *_COORD Position Mode and may lead to `std::runtime_error`.

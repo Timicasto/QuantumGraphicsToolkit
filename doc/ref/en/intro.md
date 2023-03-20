@@ -1,6 +1,6 @@
 ## API Reference Manual
 
-Here is our API Reference Manual~ Introduction to every declarations and usage of every functions is all included in the manual!<br>
+Here is our API Reference Manual~ Introduction to every declaration and usage of every function is all included in the manual!<br>
 If you want to get one which easy to read when developing, just look for them in header files (.h) ! Track the function or the definition of class and you'll find a In-code Doc!<br><br>
 
 > **NOTE** The meaning of Symbols in this Doc.<br>
