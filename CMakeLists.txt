@@ -7,7 +7,7 @@ find_package(Freetype REQUIRED)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(QuantumGraphicsToolkit main.cpp glad.c)
+add_executable(QuantumGraphicsToolkit main.cpp glad.c includes/qgt/ShaderFactory.h)
 
 include_directories(includes)
 target_link_libraries(QuantumGraphicsToolkit Freetype::Freetype GL glfw)
