@@ -12,4 +12,4 @@ If you want to get one which easy to read when developing, just look for them in
 
 `**== INDEX OF CONTENTS ==**` <br>
 [`class Window`](./window.md)<br>
-[]()
+[`class FontRenderer`, `class StaticFontRenderer`](./fontrenderer.md)<br>
