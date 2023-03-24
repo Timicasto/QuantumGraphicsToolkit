@@ -15,7 +15,10 @@ int main() {
 	
 	auto s = StaticFontRenderer("JetBrainsMono-Medium.ttf", 48, L"Test text", 0.0F, 16.0F, 1.0F, glm::vec3(0.0F,0.0F,0.0F));
 	
-	auto shader = ShaderFactory().type(VERTEX).version(330u).addInput(VEC4, "coord").addOutput(VEC2, "texCoords").addUniform(VEC3, "color").addConst(FLOAT, "ref", "1.0").construct();
+	auto shader = ShaderFactory().type(VERTEX).version(330u).addInput(VEC4, "coord")
+			.addOutput(VEC2, "texCoords").addUniform(VEC3, "color")
+			.addConst(FLOAT, "ref", "1.0").assign(Variable(GL_POSITION), Expression(Variable(VEC4, "coord"),
+			                                                                        LiteralValue(VEC4, "0.0 0.0 0.0 1.0"), Operation(ADD))).construct();
 	std::cout << shader;
 	
 	while (!w.shouldClose()) {

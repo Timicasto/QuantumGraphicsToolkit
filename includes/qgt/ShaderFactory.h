@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <variant>
 #include "utils.h"
 
 typedef enum GLSLTypes {
@@ -94,11 +95,12 @@ typedef enum Operations {
 	SUB = 2,
 	MUL = 4,
 	DIV = 8,
+	EQUAL = 16
 } Operations;
 
 class ExpressionPart {
 public:
-	virtual std::string toString() {}
+	[[nodiscard]] virtual std::string toString() const {}
 };
 
 class Operation : public ExpressionPart {
@@ -109,8 +111,46 @@ public:
 	
 	}
 	
-	std::string toString() override {
+	std::string toString() {
+		if (op & 1) {
+			return "+";
+		}
+		if ((op >> 1) & 1) {
+			return "-";
+		}
+		if ((op >> 2) & 1) {
+			return "*";
+		}
+		if ((op >> 3) & 1) {
+			return "/";
+		}
+		if ((op >> 4) & 1) {
+			return "=";
+		}
+	}
+};
+
+class Variable : public ExpressionPart {
+	GLSLTypes type;
+	std::string name;
+	bool isBuiltIn;
+	GLSLBuiltins builtin;
+
+public:
+	Variable(GLSLTypes type, const std::string& name) : type(type), name(name) {
+		isBuiltIn = false;
+	}
 	
+	explicit Variable(GLSLBuiltins builtin) : builtin(builtin) {
+		isBuiltIn = true;
+	}
+	
+	[[nodiscard]] std::string toString() const override {
+		if (isBuiltIn) {
+			return (builtin & 1) ? "gl_VertexID" : ((builtin >> 1) & 1) ? "gl_Position" : ((builtin >> 2) & 1) ? "gl_PointSize" : ((builtin >> 3) & 1) ? "gl_FragColor" : "gl_PointCoord";
+		} else {
+			return typesToString(type) + " " + name;
+		}
 	}
 };
 
@@ -188,21 +228,46 @@ public:
 };
 
 class Expression : public ExpressionPart {
+public:
 	ExpressionPart parent;
 	ExpressionPart child;
 	Operation op;
 	
-	std::string toString() override {
+	Expression(const ExpressionPart& parent, const ExpressionPart& child, const Operation& op) : parent(parent),
+	                                                                                             child(child), op(op) {}
+	
+	std::string toString() {
 		return parent.toString() + op.toString() + child.toString();
 	}
 };
 
+typedef struct ExpressionVisitor {
+public:
+	std::string* s;
+	ExpressionVisitor(std::string& str) {
+		s = &str;
+	}
+	void operator()(Expression& e) {
+		*s += e.toString();
+	}
+	void operator()(Variable& v) {
+		*s += v.toString();
+	}
+	void operator()(LiteralValue& l) {
+		*s += l.toString();
+	}
+	void operator()(Operation& o) {
+		*s += o.toString();
+	}
+} ExpressionVisitor;
+
 class ShaderFactory {
 public:
-	std::vector<std::pair<GLSLTypes, std::string>> inputs;
-	std::vector<std::pair<GLSLTypes, std::string>> outputs;
-	std::vector<std::pair<GLSLTypes, std::string>> uniforms;
-	std::vector<std::pair<std::string, LiteralValue>> constants;
+	std::vector<std::pair<GLSLTypes, std::string>> inputs{};
+	std::vector<std::pair<GLSLTypes, std::string>> outputs{};
+	std::vector<std::pair<GLSLTypes, std::string>> uniforms{};
+	std::vector<std::pair<std::string, LiteralValue>> constants{};
+	std::vector<std::variant<Operation, Variable, LiteralValue, Expression>> expressions{};
 	ShaderTypes shaderTypes;
 	unsigned int shaderVersion;
 	
@@ -238,7 +303,10 @@ public:
 		return *this;
 	}
 	
-	ShaderFactory assign() {}
+	ShaderFactory assign(const ExpressionPart& target, const ExpressionPart& value) {
+		expressions.emplace_back(Expression(target, value, Operation(EQUAL)));
+		return *this;
+	}
 	
 	std::string construct() {
 		std::stringstream stream;
@@ -270,7 +338,13 @@ public:
 	
 		stream << "\n" << "void main() {\n";
 		
-		
+		for (auto item : expressions) {
+			auto reg = item.index();
+			std::string tmp;
+			std::visit(ExpressionVisitor(tmp), item);
+			stream << tmp;
+			stream << ";\n";
+		}
 		
 		stream << "}";
 		
