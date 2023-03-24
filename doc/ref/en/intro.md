@@ -1,15 +1,14 @@
 ## API Reference Manual
 
-Here is our API Reference Manual~ Introduction to every declaration and usage of every function is all included in the manual!<br>
-If you want to get one which easy to read when developing, just look for them in header files (.h) ! Track the function or the definition of class and you'll find a In-code Doc!<br><br>
+This is our API Reference Manual, where every declaration and usage of every function is explained :) <br>
+If you want to get one which is easy to read while developing, just look for them in header files (.h)! Track the function or the definition of a class and you'll find an in-code doc!<br><br>
 
-> **NOTE** The meaning of Symbols in this Doc.<br>
+> **NOTE** symbols used in this documentation: <br>
 > !! NOTE !! :: .... the content after this symbol may conflict with your intuition. Please try to understand it.<br>
-> !! CAUT !! :: .... the content after this symbol may lead to error or unexpected behavior when debuging.<br>
-> !! WARN !! :: .... PLEASE read cautiously! DO NOT do it or critical errors may occur!
+> !! CAUT !! :: .... the content after this symbol may lead to error or unexpected behavior when debugging.<br>
+> !! WARN !! :: .... PLEASE read carefully! DO NOT do it or critical errors may occur!
 
-<br><br><br>
-
-`**== INDEX OF CONTENTS ==**` <br>
+<br>
+### Contents
 [`class Window`](./window.md)<br>
 [`class FontRenderer`, `class StaticFontRenderer`](./fontrenderer.md)<br>
