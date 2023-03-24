@@ -39,6 +39,7 @@ _// 贡献的不一定是代码 也可能是情怀_
 目前只有 Timicasto 自己一个人在开发...
 #### 感谢以下支持者:
 [@QiuYuanqing](https://github.com/QiuYuanqing) 帮忙贡献的文档翻译—— <br>
+[@aisuneko](https://github.com/aisuneko) 帮忙编辑，修改和润色英文文档... <br>
 当然还有日日夜夜在调试的时候陪着自己聊天的大家~
 <br><br>
 如果观光者大人开恩的话也可以给这个项目和此作者贡献一个star和follow &~<br><br>
