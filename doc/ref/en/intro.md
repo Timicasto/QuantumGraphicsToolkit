@@ -9,6 +9,7 @@ If you want to get one which is easy to read while developing, just look for the
 > !! WARN !! :: .... PLEASE read carefully! DO NOT do it or critical errors may occur!
 
 <br>
+
 ### Contents
 [`class Window`](./window.md)<br>
 [`class FontRenderer`, `class StaticFontRenderer`](./fontrenderer.md)<br>
