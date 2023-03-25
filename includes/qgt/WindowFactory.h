@@ -9,6 +9,7 @@ typedef struct Context {
 	int minorVer;
 	bool forwardCompat;
 	int profile;
+	int api;
 } Context;
 
 class WindowFactory{
@@ -46,12 +47,17 @@ public:
 	}
 	
 	WindowFactory defaultContext() {
-		context = {3, 3, true, GLFW_OPENGL_CORE_PROFILE};
+		context = {3, 3, true, GLFW_OPENGL_CORE_PROFILE, GLFW_OPENGL_API};
 		return *this;
 	}
 	
 	WindowFactory contextVer(int major, int minor) {
-		context = {major, minor, true, major >= 3 ? GLFW_OPENGL_CORE_PROFILE : GLFW_OPENGL_ANY_PROFILE};
+		context = {major, minor, true, major >= 3 ? GLFW_OPENGL_CORE_PROFILE : GLFW_OPENGL_COMPAT_PROFILE, GLFW_OPENGL_API};
+		return *this;
+	}
+
+	WindowFactory defaultESContext() {
+		context = {3, 2, true, GLFW_OPENGL_CORE_PROFILE, GLFW_OPENGL_ES_API};
 		return *this;
 	}
 	
