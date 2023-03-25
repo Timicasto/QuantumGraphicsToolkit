@@ -125,7 +125,7 @@ public:
 		if (aspectRatio.x < 0 || aspectRatio.y < 0 || sizeLimit.x < 0 || sizeLimit.y < 0 || sizeLimit.z < 0 || sizeLimit.w < 0) {
 			throw std::runtime_error("Window size limit or aspect ratio limit cannot be negative.");
 		}
-		auto ret = Window(windowTitle, width, height, context.majorVer, context.minorVer, context.profile, context.forwardCompat);
+		auto ret = Window(windowTitle, width, height, context.majorVer, context.minorVer, context.profile, context.forwardCompat, context.api);
 		if (isFullscreen) {
 			int tmp;
 			const auto videoMode = glfwGetVideoMode(glfwGetMonitors(&tmp)[monitor]);

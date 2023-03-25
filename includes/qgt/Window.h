@@ -44,11 +44,11 @@ public:
 	
 	glm::mat4 projection;
 	
-	Window(const std::string& title, size_t width, size_t height) : Window(title, width, height, 3, 3, GLFW_OPENGL_CORE_PROFILE, true){
+	Window(const std::string& title, size_t width, size_t height) : Window(title, width, height, 3, 3, GLFW_OPENGL_CORE_PROFILE, true, GLFW_OPENGL_API){
 	
 	}
 	
-	Window(const std::string& title, size_t width, size_t height, int majorVer, int minorVer, int profile, bool fwdCompat) {
+	Window(const std::string& title, size_t width, size_t height, int majorVer, int minorVer, int profile, bool fwdCompat, int api) {
 		if (!glfwInit()) {
 			char error[9];
 			sprintf(error, "%08X", glfwGetError(nullptr));
@@ -58,6 +58,7 @@ public:
 		} else {
 			log(INFO, "GLFW initialized.");
 		}
+		glfwWindowHint(GLFW_CLIENT_API, api);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVer);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVer);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, profile);
