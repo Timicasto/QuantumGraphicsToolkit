@@ -1,10 +1,23 @@
 ## Quantum Graphics Toolkit
 Quantum Graphics Toolkit (以下简称 QGT) 是一个基于OpenGL封装出的图形库<br>
-它保留了OpenGL极致灵活的特性，可以很简单也可以很复杂，你可以用寥寥几行代码写出一个GUI应用，也甚至可以用稍稍多一些的代码，做出一个好玩的2D游戏
+它保留了OpenGL极致灵活的特性，可以很简单也可以很复杂，你可以用寥寥几行代码写出一个GUI应用，也甚至可以用稍稍多一些的代码，做出一个好玩的2D游戏... （不过因为还处于非常早期的开发阶段，不少功能还没做全... 呜...）
 
 > <一张小贴纸><br>
 > 看看这满篇的WIP... 我们的精力已经不足以翻译文档全文了... 所以 有人可以来帮忙嘛！
 
+## 试试看？
+首先需要这些库： `glfw-x11` （如果用 Wayland 就  `glfw-wayland`），`freetype2`，`glm` 和 `mesa`。
+之后只需 clone 并 cd 进本仓库，用你喜欢的编译系统编译 `main.cpp` 就好了哦 （比如这里用的是 `ninja`）:
+
+```bash
+mkdir build
+cd build
+cmake -G Ninja ../
+ninja
+./QuantumGraphicsToolkit
+```
+
+## 一些资源
 [英文介绍传送门](./README.md)<br>
 
 [`任意门::API参考手册(英)`](./doc/ref/en/intro.md) `::WIP`<br>
