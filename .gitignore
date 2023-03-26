@@ -1,2 +1,9 @@
 .idea
 cmake-build-*
+.vs
+.vscode
+.build
+build
+.install
+*.o
+*.ninja
