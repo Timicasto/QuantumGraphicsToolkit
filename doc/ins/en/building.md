@@ -31,4 +31,4 @@ include_directories(.../KHR .../glad)
 ```
 Just include it in your project and voila! Everything should be up and running now. If you fail to understand, just go ahead and use the `CMakeLists.txt` in this repo.
 
-(btw, make sure that your CMake install has configured support for C++11 and above, and enable at least `-O2` or `-Ofast` optimizations if possible for enhanced performance of STL related calls.
+(btw, make sure that your CMake install has configured support for C++11 and above, and enable optimizations (`-O2` and above, except `-Ofast`) if possible for enhanced performance of STL related calls.
